@@ -1,6 +1,6 @@
 "use strict";
 
-import Piece from "./Jigsaw2/Piece.js";
+import Piece from "./Piece.js";
 
 class Board{
     boardWrap = null;
