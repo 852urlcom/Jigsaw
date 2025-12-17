@@ -1,7 +1,7 @@
 "use strict";
 
-// import Piece from "./Jigsaw2/Piece.js";
-import Board from "./Jigsaw2/Board.js";
+// import Piece from "./Piece.js";
+import Board from "./Board.js";
 
 class Game{
     gameWrap = null;
