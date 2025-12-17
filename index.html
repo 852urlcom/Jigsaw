@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ko" >
+<head>
+	<title>game jigsaw</title>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Script-Type" content="text/javascript">
+	<meta http-equiv="Content-Style-Type" content="text/css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<script src="/js/ForGoogle.js"></script>
+	<!-- google analytics -->
+	<script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
+	
+
+	<!-- jquery related -->
+	<!-- <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script> -->
+
+	<!-- Bootstrap 4: IE8 not supported! -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous"> 
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>  -->
+	<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" crossorigin="anonymous"></script> -->
+	<!-- vue.js -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+	
+	<!-- meta og -->
+	
+	<meta property="og:title" content="game jigsaw">
+	<meta property="og:description" content="game jigsaw">
+	<meta name="og:image" content="http://www.mins01.com/img/logo.gif">
+	<meta property="og:image:width" content="190">
+	<meta property="og:image:height" content="70" />
+	<meta property="og:site_name" content="game jigsaw" />
+	<meta property="og:type" content="website">
+	
+	<!-- //meta og -->
+	
+
+    <link rel="stylesheet" href="/Jigsaw2/assets/ui_jigsaw/piece.css">
+    <link rel="stylesheet" href="/Jigsaw2/assets/ui_jigsaw/piece-shape-mask-svgs/piece-shape-mask-svgs.css">
+    <link rel="stylesheet" href="/Jigsaw2/assets/ui_jigsaw/jigsaw.css">
+
+	<link rel="stylesheet" href="/Jigsaw2/assets/js_elementMove/elementMove.css">
+	<script src="/Jigsaw2/assets/js_elementMove/ElementMove.js"></script>
+
+
+	<link rel="stylesheet" href="/Jigsaw2/assets/style.css">
+	<style>
+		.game-layout{
+			--img-aspect-ratio : 1 / 1;
+			--background-image:url(./Jigsaw2/assets/bg/bg-1.jpg);
+		}
+
+		.jigsaw-wrap .piece-shape{
+			background-image: var(--background-image,none);
+		}
+		/* .jigsaw-wrap{
+			background-image: var(--background-image,none);
+		} */
+		.preview-wrap{
+			background-image: var(--background-image,none);
+		}
+
+		
+		.element-move-body-moving .element-move-target{
+			will-change: auto;
+		}
+		.element-move-target:hover,
+		.element-move-target:active,
+		.element-move-target.element-move-target-moving{
+			will-change: transform;
+		}
+		/* .element-move-target{
+			will-change: transform;
+		} */
+
+
+
+    </style>
+    <script type="module">
+		import Game from "./Jigsaw2/assets/game/Game.js";
+        globalThis.game = new Game(document.querySelector('.game-wrap'))
+    </script>
+	<script>
+		let em = null;
+		window.addEventListener('load',(event)=>{
+			initConfForQstr();
+			window.addEventListener('resize',game.resize)
+
+			game.em = new ElementMove(game.board.boardWrap)
+			// game.board.width=400; //자동 세팅 됨
+			// game.board.height=400;
+			// game.board.divX = 2;
+			// game.board.divY = 1;
+			game.resize();
+			reayGame();
+		})
+		function initConfForQstr(f){
+			if(!f) f = document.form_conf;
+			const url = new URL(location);
+			const pieceNumber = url.searchParams.get('pieceNumber');
+			if(pieceNumber) f.pieceNumber.value = pieceNumber;
+			const imgUrl = url.searchParams.get('imgUrl');
+			if(imgUrl) f.imgUrl.value = imgUrl;
+			const pieceShape = url.searchParams.get('pieceShape');
+			if(pieceShape) f.pieceShape.value = pieceShape;
+
+			syncPieceShape();
+		}
+		function reayGame(f){
+			if(!f) f = document.form_conf;
+			let imgUrl = './Jigsaw2/assets/bg/bg-1.jpg';
+			if(f.imgUrl.value.length >4){
+				imgUrl = f.imgUrl.value;
+			}
+			loadImageUrl(imgUrl,()=>{
+				startGame(f)
+			})
+			
+		}
+		function startGame(f){
+
+			let pieceNumbers = f.pieceNumber.value.split(',');
+			game.setBoard(pieceNumbers[0],pieceNumbers[1]);
+			game.start();
+			changeUrl(f)
+		}
+		function changeUrl(f){
+			if(!f) f = document.form_conf;
+			const state = { page_id: 1, user_id: 5 };
+			const url = new URL(location);
+			url.searchParams.set("pieceNumber", f.pieceNumber.value);
+			url.searchParams.set("imgUrl", f.imgUrl.value);
+			url.searchParams.set("pieceShape", f.pieceShape.value);
+			history.pushState(state, "", url);
+		}
+		function syncPieceShape(){
+			document.querySelector('.piece-container').dataset.shape = form_conf.pieceShape.value;
+		}
+		function loadImageUrl(url,cb){
+			// console.log('loadImageUrl',url);
+			let img = new Image();
+			img.referrerPolicy = 'no-referrer';
+			img.onload = function(event){
+				// console.log('onalod',event,img);
+				game.gameWrap.style.setProperty('--background-image',`url(${img.src})`);
+				document.querySelector('.game-layout').style.setProperty('--img-aspect-ratio', img.naturalWidth+'/'+img.naturalHeight); // 비율 재정의
+				document.querySelector('.game-layout').dataset.imgOrientation = img.naturalWidth >=img.naturalHeight?'landscape':'portrait'
+				game.resize();
+				cb();
+			}
+			img.src = url;
+
+		}
+	</script>
+</head>
+<body>
+	<div class="game-layout">
+		<div class="game-layout-header">
+			<div class="container game-navi-container">
+				<div class="row">
+					<div class="col-md-auto"><h1 class="m-0" style="font-size: 40px;">Jigsaw puzzle</h1></div>
+					<div class="col">
+						<form name="form_conf" class="form-inline justify-content-center" action="" onsubmit="reayGame(this);return false;">
+							<div class="input-group m-1 input-group-sm">
+								<div class="input-group-prepend">
+								<span class="input-group-text">image</span>
+								</div>
+								<input name="imgUrl" type="url" class="form-control" placeholder="URL" >
+							</div>
+							<div class="input-group m-1 input-group-sm">
+								<div class="input-group-prepend">
+								<span class="input-group-text">Number of pieces</span>
+								</div>
+								<select name="pieceNumber" class="form-control">
+									<option value="2,1">2 piece</option>
+									<option value="2,2">4 piece</option>
+									<option value="3,3">9 piece</option>
+									<option value="4,4">16 piece</option>
+									<option value="5,5">25 piece</option>
+									<option value="6,6">36 piece</option>
+									<option value="7,7">49 piece</option>
+									<option value="8,8">64 piece</option>
+									<option value="9,9">81 piece</option>
+									<option value="10,10">100 piece</option>
+									<option value="20,10">200 piece</option>
+								</select>
+							</div>
+							<div class="input-group m-1 input-group-sm">
+								<div class="input-group-prepend">
+								<span class="input-group-text">Sculpture shape</span>
+								</div>
+								<select name="pieceShape" class="form-control" onchange="syncPieceShape()">
+									<option value="clip-zigzag">clip-zigzag</option>
+									<option value="clip-rect">clip-rect</option>
+									<option value="mask-css">mask-css</option>
+									<option value="mask-svg" selected>mask-svg</option>
+								</select>
+							</div>
+							<button class="btn btn-sm btn-success" type="submit">Preparation</button>
+	
+							<button class="btn btn-sm btn-info m-1" type="button" onclick="game.preview()" >Image</button>
+							<button class="btn btn-sm btn-danger m-1" type="button" onclick="game.solve()" >Auto-solve</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="game-layout-body">
+			<div class="game-outbox game-wrap">
+				<div class="preview-layer" onclick="game.preview()">
+					<div class="padding-wrap">
+						<div class="element-move-isolation ">
+							<div class="preview-wrap jigsaw-wrap"></div>
+						</div>
+					</div>
+				</div>
+				<div class="padding-wrap">
+					<div class="element-move-isolation ">
+						<div class="element-move-area board-wrap  jigsaw-wrap piece-container game-jigsaw-wrap" data-shape="mask-svg" style="gap:1px;--div-x:3; --div-y:3;"  data-move-type="transform" data-move-isolation="center">
+							<div class="piece-wrap" data-pos-x="0" data-pos-y="0"><div class="piece-shape" data-shape-top="p" data-shape-right="p" data-shape-bottom="p" data-shape-left="p"></div></div>
+							<div class="piece-wrap" data-pos-x="1" data-pos-y="0"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+							<div class="piece-wrap" data-pos-x="2" data-pos-y="0"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+			
+							<div class="piece-wrap" data-pos-x="0" data-pos-y="1"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+							<div class="piece-wrap" data-pos-x="1" data-pos-y="1"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+							<div class="piece-wrap" data-pos-x="2" data-pos-y="1"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+			
+							<div class="piece-wrap" data-pos-x="0" data-pos-y="2"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+							<div class="piece-wrap" data-pos-x="1" data-pos-y="2"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+							<div class="piece-wrap" data-pos-x="2" data-pos-y="2"><div class="piece-shape" data-shape-top="0" data-shape-right="p" data-shape-bottom="n" data-shape-left="n"></div></div>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+	<div class="container nav-container">
+		
+
+	</div>
+	<div class="container-fulid">
+		
+		
+
+	</div>
+</body>
+</html>

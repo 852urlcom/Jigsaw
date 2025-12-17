@@ -1,0 +1,6 @@
+[submodule "assets/ui_jigsaw"]
+	path = Jigsaw2/assets/ui_jigsaw
+	url = https://github.com/mins01/ui_jigsaw.git
+[submodule "assets/js_elementMove"]
+	path = Jigsaw2/assets/js_elementMove
+	url = https://github.com/mins01/js_elementMove.git
