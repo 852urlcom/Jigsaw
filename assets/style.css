@@ -1,0 +1,195 @@
+@charset "utf-8";
+
+.game-layout{
+    position: fixed;
+    left:0;right:0;top:0;bottom:0;
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    padding: 10px;
+}
+.game-layout-header{
+    flex: 0 0 auto;
+}
+.game-layout-body{
+    flex: 1 0 50%;
+}
+
+
+
+
+
+
+.game-outbox{
+    border-radius: 10px;
+    background-color: #eee;
+    border:3px solid #999;
+    /* box-shadow: inset 0 0 10px #00000099; */
+    overflow: hidden;
+    margin: 0px auto;
+
+    /* aspect-ratio: 1/1; */
+    /* max-width:100vmin; */
+    min-width:200px;
+    /* width:clamp(200px,90vmin,900px); */
+    /* height:80vmin; */
+    position: relative;
+    width:100%;
+    height: 100%;
+}
+.padding-wrap{
+    width: 100%;
+    height: 100%;
+    padding:10px;
+}
+.game-wrap{
+
+}
+.game-wrap.ended .piece-wrap{
+    /* filter: drop-shadow(0px 0px 1px #33ff33ff); */
+    filter: none;
+
+}
+
+.game-jigsaw-wrap{
+    background-color: #666;
+    box-shadow: inset 0px 0px 5px 5px #00000099;
+    outline: 2px solid #000;
+}
+
+.piece-shape{
+    /* background-color: #fff; */
+    background-color: transparent;
+    pointer-events: none;
+}
+.piece-wrap{
+    /* filter: drop-shadow(3px 3px 5px #00000099); */
+    filter: drop-shadow(0px 0px 5px #ffff33ff);
+}
+.piece-wrap.fixed{
+    z-index: 5 !important;
+    pointer-events: none !important;
+    filter: drop-shadow(0px 0px 1px #0033ffff);
+}
+.piece-wrap.element-move-target-moving{
+    filter: drop-shadow(0px 0px 5px #ffaa0099);
+}
+
+/* 이미지 미리보기 */
+.game-wrap.preview .preview-layer{
+    opacity: 1;
+    visibility: visible;
+}
+.preview-layer{
+    z-index: 5;
+    /* pointer-events: none; */
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    background-color: #00000099;
+}
+.preview-wrap{
+    background-image: none;
+    background-size: cover;
+    outline: 2px solid #ffffff;
+
+    background-size: var(--jigsaw-width) var(--jigsaw-height);
+}
+/* .preview-wrap{
+    aspect-ratio: 1/1;
+    width:70%;
+    height: auto;
+} */
+
+/* 직소퍼즐 */
+.jigsaw-wrap{
+    position: relative;
+    z-index: 4;
+}
+.preview-wrap,
+.jigsaw-wrap{
+    aspect-ratio: var(--img-aspect-ratio);
+    width:100%;
+    /* height: auto; */
+    object-fit: contain;
+}
+.game-layout[data-img-orientation="landscape"] :is(.preview-wrap, .jigsaw-wrap){
+    width:70%;
+    height: auto;
+}
+.game-layout[data-img-orientation="portrait"] :is(.preview-wrap, .jigsaw-wrap){
+    width: auto;
+    height: 70%;
+}
+
+
+/* 피스 이동 제한 부 */
+.element-move-isolation{
+    width:100%;
+    height:100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+
+
+
+@media (orientation: landscape) {
+    .game-layout{
+        flex-direction: row;
+
+    }
+    .game-layout-header{
+        flex: 0 0 200px;
+    }
+    .game-layout-body{
+        flex: 1 0 50%;
+    }
+    .game-navi-container .input-group{
+        flex: 1 0 100%;
+    }
+}
+
+@media (max-aspect-ratio: 9/16) {
+    .game-layout[data-img-orientation="landscape"] :is(.preview-wrap, .jigsaw-wrap){
+        width:70%;
+        height: auto;
+    }
+    .game-layout[data-img-orientation="portrait"] :is(.preview-wrap, .jigsaw-wrap){
+        width:70%;
+        height: auto;
+    }
+}
+@media (min-aspect-ratio: 16/9) {
+    .game-layout[data-img-orientation="landscape"] :is(.preview-wrap, .jigsaw-wrap){
+        width:auto;
+        height: 70%;
+    }
+    .game-layout[data-img-orientation="portrait"] :is(.preview-wrap, .jigsaw-wrap){
+        width:auto;
+        height: 70%;
+    }
+}
+
