@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko" >
+<head>
+	<title>js elementMove</title>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Script-Type" content="text/javascript">
+	<meta http-equiv="Content-Style-Type" content="text/css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<script src="/js/ForGoogle.js"></script>
+	<!-- google analytics -->
+	<script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
+	
+
+	<!-- jquery 관련 -->
+	<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+
+	<!-- 부트스트랩 4 : IE8지원안됨! -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous"> 
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>  -->
+	<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" crossorigin="anonymous"></script> -->
+	<!-- vue.js -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+	
+	<!-- meta og -->
+	
+	<meta property="og:title" content="js elementMove">
+	<meta property="og:description" content="js elementMove">
+	<meta name="og:image" content="http://www.mins01.com/img/logo.gif">
+	<meta property="og:image:width" content="190">
+	<meta property="og:image:height" content="70" />
+	<meta property="og:site_name" content="js elementMove" />
+	<meta property="og:type" content="website">
+	
+	<!-- //meta og -->
+	<link rel="stylesheet" href="/Jigsaw2/assets/js_elementMove/elementMove.css">
+	<script src="/Jigsaw2/assets/js_elementMove/ElementMove.js"></script>
+	<script>
+		let ems = [];
+		window.addEventListener('load',(event)=>{
+			document.querySelectorAll('.element-move-area').forEach((el)=>{
+				let em = new ElementMove(el);
+				ems.push(em);
+			})
+		})
+	</script>
+	<style>
+		.box{outline: 2px dotted #ff000099; background-color: #ff000099;width:50px; height:50px;}
+		.box-hover:hover,.box-hover.hover{
+			filter: invert(1);
+		}
+		.flex-center{
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			align-content: center;
+			justify-content: center;
+			align-items: center;
+			white-space: nowrap;
+		}
+		.flex-center.flex-top{
+			align-items: flex-start;
+		}
+
+		.margin-center{margin:0 auto;}
+
+		.element-move-isolation{outline: 2px dotted #ff990099; background-color: #ff990099;
+			display: flex;
+			flex-wrap: nowrap;
+			align-content: center;
+			justify-content: center;
+			align-items: center;
+			/* width: 300px; height: 300px; */
+			padding:50px;
+			width:min-content;
+		}
+		.element-move-area{outline: 2px dotted #99ff9999;background-color: #99ff9999; width: 200px; height: 200px;}
+		.element-move-target{outline: 1px solid #0000ff99; background-color: #ccbbccaa; }
+
+		
+	</style>
+</head>
+<body>
+	<div class="container pb-3">
+		<h1>js elementMove</h1>
+		<hr>
+		<ul class="list-group">
+			<li class="list-group-item"><a href="https://github.com/mins01/js_elementMove">GITHUB</a></li>
+			<li class="list-group-item">HTML의 element를 마우스/터치/펜을 이용해서 사용자가 위치 조정이 가능하도하는 라이브러리</li>
+		</ul>
+		<hr>
+		<h2>DOC</h2>
+		<ul class="list-group">
+			<li class="list-group-item">
+				<h3>files</h3>
+				<table class="table table-bordered table-sm">
+					<tr><th>ElementMove.js</th><td>이동 제어 스크립트 파일</td></tr>
+					<tr><th>elementMove.css</th><td>이동 제어 스타일 파일</td></tr>
+					<tr><th>index.html</th><td>현재 파일. 도움말+샘플</td></tr>
+					<tr><th>LICENSE</th><td>라이센스 파일. "공대여자는 이쁘다"</td></tr>
+					<tr><th>README.md</th><td>라이브러리 간단 설명</td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>HTML class</h3>
+				<table class="table table-bordered table-sm">
+					<tr><th>.element-move-area</th><td>이동 제어 영역 (*필수)(기본 세팅이 처리됨)</td></tr>
+					<tr><th>.element-move-target</th><td>이동 대상</td></tr>
+					<tr><th>.element-move-isolation</th><td>격리 영역. (이동 제한 영역)(옵션)</td></tr>
+					<tr><th>구조</th><td>
+						<code>.element-move-area .element-move-target</code><br>
+						<code>.element-move-isolation .element-move-target</code><br>
+					</td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>.element-move-target attributes</h3>
+				<h4>data-move-type = transform|position (필수)</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>transform</th><td>transform:translate(X,Y)</td></tr>
+					<tr><th>position</th><td>position:absolute;left:X;top:Y</td></tr>
+					<tr><th>주의</th><td>transform 와 position 의 x=0,y=0 의 위치는 다르다!</td></tr>
+				</table>
+				<h3>.element-move-isolation attributes</h3>
+				<h4>data-move-isolation = in|center|out|number|none (옵션)</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>in</th><td>격리 영역 안까지</td></tr>
+					<tr><th>center</th><td>target의 반이 걸친다</td></tr>
+					<tr><th>out</th><td>격리 영역 테두리까지</td></tr>
+					<tr><th>number</th><td>지정한 범위까지(음수 가능)</td></tr>
+					<tr><th>none</th><td>격리 영역 사용 안함</td></tr>
+					<tr><th>(빈값, 설정 안함)</th><td>격리 영역 사용 안함</td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>CSS</h3>
+				<h4>--move-x , --move-y</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>--move-x</th><td>.element-move-target 의 left 이동 값(px)</td></tr>
+					<tr><th>--move-y</th><td>.element-move-target 의 top 이동 값(px)</td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>javascript</h3>
+				<table class="table table-bordered table-sm">
+					<tr><th>ElementMove</th><td>클래스</td></tr>
+					<tr><th>static ElementMove.findTarget(el)</th><td>el 에서 가장 가까운 .element-move-target 을 반환</td></tr>
+					<tr><th>static ElementMove.findArea(el)</th><td>el 에서 가장 가까운 .element-move-area 을 반환</td></tr>
+					<tr><th>static ElementMove.findIsolation(el)</th><td>el 에서 가장 가까운 .element-move-isolation 을 반환</td></tr>
+					<tr><th>static ElementMove.moveTo(target,x,y)</th><td>x,y 로 이동</td></tr>
+					<tr><th>static ElementMove.moveBy(target,x,y)</th><td>x,y 만큼 이동</td></tr>
+					<tr><th>static ElementMove.moveToElement(target,el)</th><td>el 의 위치로 이동</td></tr>
+					<tr><th>static ElementMove.resetMove(target)</th><td>초기 위치로 이동</td></tr>
+					<tr><th>static ElementMove.isolate(moveIsolation,el)</th><td>moveIsolation 기준에 맞춰서 격리 지역안으로 이동한다.</td></tr>
+					<tr><th>let emObject = new ElementMove(areaElement)</th><td>기본 사용법</td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>event</h3>
+				<h4>.element-move-area 에 아래 이벤트를 등록해서 사용한다.</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>pointerdown</th><td>(라이브버리에서 자동 사용)</td></tr>
+					<tr><th>contextmenu</th><td> contextmenu 동작을 금지 시킨다. (라이브버리에서 자동 사용)</td></tr>
+				</table>
+				<h4>window.document 에 아래 이벤트를 동적 등록해서 사용한다.</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>pointermove</th><td>(라이브버리에서 자동 사용)</td></tr>
+					<tr><th>pointerup</th><td>(라이브버리에서 자동 사용)</td></tr>
+				</table>
+				<h4>.element-move-target 에 아래 커스텀 이벤트를 등록해서 사용한다. 해당 동작의 POST 이벤트로 동작시킨다. (개발자가 필요 시 사용)</h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>empointerdown</th><td>pointerdown 이벤트 때 trigger 된다.</td></tr>
+					<tr><th>empointermove</th><td>pointermove 이벤트 때 trigger 된다.</td></tr>
+					<tr><th>empointerup</th><td>mpointerup 이벤트 때 trigger 된다.</td></tr>
+					<tr><th>ex</th><td><code>TARGET.addEventListener('empointerdown',function(event){<br>
+						console.log(event.type,event.detail.event.pageX,event.detail.event.pageY);<br>
+					})</code></td></tr>
+				</table>
+				<h4>.element-move-target 에 아래 커스텀 이벤트의 event.detail </h4>
+				<table class="table table-bordered table-sm">
+					<tr><th>event.detail</th><td><code>
+						event.detail = {<br>
+							event: 이전 연관 event 객체(PointerEvent),<br>
+							elementMove: 관련 ElementMove 객체,<br>
+						}
+					</code></td></tr>
+				</table>
+			</li>
+			<li class="list-group-item">
+				<h3>참고</h3>
+				<ul>
+					<li>.element-move-target 가 .element-move-isolation  속에 있어야만 격리 영역이 동작한다. (가장 가까운 태그 기준으로 격리 영역이 사용된다) </li>
+					<li>user-select:none 과 touch-action: none; 이 기본 적용되어있다. (모바일 브라우저의 터치 동작 제어를 해제하기 위해서)</li>
+				</ul>
+			</li>
+		</ul>
+		<hr>
+		<h2>SAMPLE</h2>
+		<hr>
+		<h3>data-move-type="transform"</h3>
+		<div id="area1" class="element-move-area margin-center" data-move-type="transform">
+			<div id="area1-target1" class="element-move-target box flex-center" onpointerup="console.log('이동 종료')">1</div>
+			<div id="area1-target2" class="element-move-target box flex-center">2</div>
+		</div>
+		<hr>
+		<h3>data-move-type="position"</h3>
+		<div id="area2" class="element-move-area margin-center" data-move-type="position">
+			<div id="area2-target1" class="element-move-target box flex-center">1</div>
+			<div id="area2-target2" class="element-move-target box flex-center">2<span>asdasd</span></div>
+		</div>
+		<hr>
+		<h3>--move-y:125px !important, --move-x:125px !important</h3>
+		<div class="element-move-isolation  margin-center">
+			<div id="area8" class="element-move-area " data-move-type="position" data-move-isolation="center">
+				<div id="area8-target1" class="element-move-target box flex-center" style="--move-x:100px" 
+				onpointermove="var pos = ElementMove.pos(this);this.textContent=pos.x"
+				>1</div>
+				<div id="area8-target2" class="element-move-target box flex-center" style="--move-x:100px;--move-y:10px"  style="--move-x:125px" 
+				onpointermove="var pos = ElementMove.pos(this);this.textContent=pos.y" 
+				>2</div>
+			</div>
+		</div>
+		
+		<style>
+			#area8-target1{
+				--move-y:75px !important;
+				cursor: ew-resize;
+
+			}
+			#area8-target2{
+				--move-x:75px !important;
+				cursor: ns-resize;
+			}
+		</style>
+		<hr>
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="none"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_7" class="element-move-area margin-center" data-move-type="position" data-move-isolation="none">
+				<div id="area5_7-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_7-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation=""</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_7" class="element-move-area margin-center" data-move-type="position" data-move-isolation="">
+				<div id="area5_7-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_7-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="in"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_1" class="element-move-area margin-center" data-move-type="position" data-move-isolation="in">
+				<div id="area5_1-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_1-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="center"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_2" class="element-move-area margin-center" data-move-type="position" data-move-isolation="center">
+				<div id="area5_2-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_2-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="out"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_5" class="element-move-area margin-center" data-move-type="position" data-move-isolation="out">
+				<div id="area5_5-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_5-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="100"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_6" class="element-move-area margin-center" data-move-type="position" data-move-isolation="100">
+				<div id="area5_6-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_6-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="position" with data-move-isolation="-100"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_7" class="element-move-area margin-center" data-move-type="position" data-move-isolation="-100">
+				<div id="area5_7-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_7-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+
+		<h3>.element-move-isolation with data-move-type="transform" with data-move-isolation="center"</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_4" class="element-move-area margin-center" data-move-type="transform" data-move-isolation="center">
+				<div id="area5_4-target1" class="element-move-target box flex-center">1</div>
+				<div id="area5_4-target2" class="element-move-target box flex-center">2</div>
+			</div>
+		</div>
+		<hr>
+		<h3>ElementMove.isolate(in|center|out|none|number,target)</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_8" class="element-move-area margin-center" data-move-type="transform" data-move-isolation="">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('center',ElementMove.findTarget(this))">isolate(center)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('out',ElementMove.findTarget(this))">isolate(out)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('none',ElementMove.findTarget(this))">isolate(none)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('100',ElementMove.findTarget(this))">isolate(100)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('-100',ElementMove.findTarget(this))">isolate(-100)</button></div>
+			</div>
+		</div>
+		<hr>
+		<h3>ElementMove.moveTo(target,x,y)</h3>
+		<div class="element-move-isolation margin-center">
+			<div id="area5_8" class="element-move-area margin-center" data-move-type="transform" data-move-isolation="">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.moveTo(ElementMove.findTarget(this),0,0)">moveTo(target,0,0)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.moveTo(ElementMove.findTarget(this),0,0)">moveTo(target,0,0)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.moveTo(ElementMove.findTarget(this),0,0)">moveTo(target,0,0)</button></div>
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.moveTo(ElementMove.findTarget(this),0,0)">moveTo(target,0,0)</button></div>
+			</div>
+		</div>
+
+
+		<hr>
+		<h3>lementMove.hitTest(), ElementMove.moveToElement(), ElementMove.resetMove(), event onpointerup</h3>
+		<div id="area6" class="element-move-area margin-center" data-move-type="position" >
+			<div id="area6-target1" class="element-move-target box flex-center" onpointermove="hitTest(event,this,document.querySelector('#area6-box1'))" onpointerup="let r = hitTest(event,this,document.querySelector('#area6-box1'));console.log('hitTest',r); if(r){ElementMove.moveToElement(this,document.querySelector('#area6-box1'))}else{ElementMove.resetMove(this)}">1</div>
+			<div id="area6-target2" class="element-move-target box flex-center" style="--move-x:100px;--move-y:10px" onpointermove="hitTest(event,this,document.querySelector('#area6-box2'))" onpointerup="let r = hitTest(event,this,document.querySelector('#area6-box2'));console.log('hitTest',r); if(r){ElementMove.moveToElement(this,document.querySelector('#area6-box3'))}else{ElementMove.resetMove(this)}">2</div>
+
+			<div id="area6-box1" class="box flex-center box-hover" style="position: absolute; left:200px; top:50px">HERE 1</div>
+			<div id="area6-box2" class="box flex-center box-hover" style="width:100px;height:100px;padding:25px; background-color: #0000ff33;position: absolute; left:200px; top:100px ">
+				<div id="area6-box3" class="box flex-center">HERE 2</div>
+			</div>
+		</div>
+		<script>
+		function hitTest(event,target,hitedTarget){
+			const els = document.elementsFromPoint(event.clientX, event.clientY);
+			document.querySelectorAll('.hover').forEach((el)=>{el.classList.remove('hover')})
+			let r =  els.find(el=>{if(el===hitedTarget){ hitedTarget.classList.add('hover'); return true}});
+			return !!r;
+    	}
+		</script>
+
+		<hr>
+		<h3>pointer-events: none with PointerEvent empointerup (not workig hover in android chrome)</h3>
+		<div id="area7" class="element-move-area margin-center" data-move-type="position" data-move-isolation="center">
+			<div id="area7-target1" class="element-move-target box flex-center" onpointerup="">1</div>
+			<div id="area7-target2" class="element-move-target box flex-center" style="--move-x:100px;--move-y:10px"  onpointerup="">2</div>
+
+			<div id="area7-box1" class="box flex-center box-hover" style="position: absolute; left:200px; top:50px">HERE 1</div>
+			<div id="area7-box2" class="box flex-center box-hover" style="width:100px;height:100px;padding:25px; background-color: #0000ff33;position: absolute; left:200px; top:100px ">
+				<div id="area7-box3" class="box flex-center">HERE 2</div>
+			</div>
+		</div>
+		<style>
+			.element-move-target-moving#area7-target1{
+				pointer-events: none;
+			}
+			.element-move-target-moving#area7-target2{
+				pointer-events: none;
+			}
+		</style>
+		<script>
+			document.querySelector('#area7-target1').addEventListener('empointerup',function(event){
+				console.log(event.detail.elementMove,event.detail.event);
+				const els = document.elementsFromPoint(event.detail.event.clientX, event.detail.event.clientY);
+        		let r =  els.find(el=>{return el===document.querySelector('#area7-box1')});
+
+				console.log('hitedTarget',r); 
+				if(r){ElementMove.moveToElement(this,document.querySelector('#area7-box1'))}else{ElementMove.resetMove(this)}
+			})
+			document.querySelector('#area7-target2').addEventListener('empointerdown',function(event){
+				console.log(event.type,event.detail.event.pageX,event.detail.event.pageY);
+			})
+			document.querySelector('#area7-target2').addEventListener('empointermove',function(event){
+				console.log(event.type,event.detail.event.pageX,event.detail.event.pageY);
+			})
+			document.querySelector('#area7-target2').addEventListener('empointerup',function(event){
+				console.log(event.type,event.detail.event.pageX,event.detail.event.pageY);
+				const els = document.elementsFromPoint(event.detail.event.clientX, event.detail.event.clientY);
+        		let r =  els.find(el=>{return el===document.querySelector('#area7-box2')});
+
+				console.log('hitTest',r); 
+				if(r){ElementMove.moveToElement(this,document.querySelector('#area7-box3'))}else{ElementMove.resetMove(this)}
+			})
+		</script>
+		<hr>
+		<h3>.element-move-isolation with multiple .element-move-area</h3>
+		<div class="element-move-isolation margin-center" style="display: block;height: auto;">
+			<div class="element-move-area margin-center" data-move-type="position" data-move-isolation="">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+			</div>
+			<hr>
+			<div class="element-move-area margin-center" data-move-type="transform" data-move-isolation="">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+			</div>
+		</div>
+
+		<hr>
+		<h3>.element-move-area with multiple .element-move-isolation with multiple </h3>
+		<div class="element-move-area margin-center" data-move-type="position" data-move-isolation="" style="display: block;height: auto;">
+			<div class="element-move-isolation margin-center" style="display: block;height: auto;">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+			</div>
+			<div class="element-move-isolation margin-center" style="display: block;height: auto;">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+			</div>
+			<div class="element-move-isolation margin-center" style="display: block;height: auto;">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" ><button class="btn btn-sm btn-info" type="button" onclick="ElementMove.isolate('in',ElementMove.findTarget(this))">isolate(in)</button></div>
+			</div>
+		</div>
+
+		<hr>
+		<h3>onpointerup="ElementMove.isolate()"</h3>
+		<div class="element-move-isolation margin-center">
+			<div class="element-move-area margin-center" data-move-type="transform" data-move-isolation="">
+				<div class="element-move-target box flex-center flex-top"style="--move-x: 300px; --move-y: -50px;" onpointerup="ElementMove.isolate('in',this)" >1</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
